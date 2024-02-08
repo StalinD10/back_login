@@ -1,6 +1,9 @@
 import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import { createAccessToken } from '../libs/jwt.js';
+import { token } from 'morgan';
+import jwt from 'jsonwebtoken'
+import { TOKEN_SECRET } from '../config.js';
 
 export const register = async (req, res) => {
     const { email, password, username } = req.body;
@@ -23,7 +26,7 @@ export const register = async (req, res) => {
                 email: userSaved.email,
             },
             token: token
-            
+
         })
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -48,8 +51,8 @@ export const login = async (req, res) => {
                 username: userFound.username,
                 email: userFound.email,
             },
-            token:token
-          
+            token: token
+
         })
 
     } catch (error) {
@@ -62,4 +65,32 @@ export const logout = (req, res) => {
         expires: new Date(0),
     });
     return res.sendStatus(200);
+}
+
+export const validateToken = async (req, res) => {
+    const tokenHeader = req.header('x-token');
+
+    if (!tokenHeader) {
+        res.status(401).json({ message: 'No hay token en la petición' });
+    }
+
+    try {
+        const {id} = jwt.verify(tokenHeader, TOKEN_SECRET);
+       
+        const userSaved = await User.findById(id);
+        if (!userSaved) {
+            return res.status(401).json({ message: 'Token no válido - usuario no existe' })
+        }
+        res.json({
+            user: {
+                id: userSaved._id,
+                username: userSaved.username,
+                email: userSaved.email,
+            },
+            token: tokenHeader
+        });
+
+    } catch (error) {
+        return res.status(401).json({ message: 'Token inválido' });
+    }
 }
