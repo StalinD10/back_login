@@ -1,12 +1,14 @@
 import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import { createAccessToken } from '../libs/jwt.js';
-import { token } from 'morgan';
 import jwt from 'jsonwebtoken'
 import { TOKEN_SECRET } from '../config.js';
+import { uploadImage } from '../utils/cloudinary.js';
 
 export const register = async (req, res) => {
+
     const { email, password, username } = req.body;
+
 
     try {
         const passwordHash = await bcrypt.hash(password, 10)
@@ -15,6 +17,10 @@ export const register = async (req, res) => {
             email,
             password: passwordHash
         });
+
+        if(req.files?.image){
+            uploadImage
+        }
 
         const userSaved = await newUser.save();
         const token = await createAccessToken({ id: userSaved._id });
@@ -73,10 +79,9 @@ export const validateToken = async (req, res) => {
     if (!tokenHeader) {
         res.status(401).json({ message: 'No hay token en la petición' });
     }
-
     try {
-        const {id} = jwt.verify(tokenHeader, TOKEN_SECRET);
-       
+        const { id } = jwt.verify(tokenHeader, TOKEN_SECRET);
+
         const userSaved = await User.findById(id);
         if (!userSaved) {
             return res.status(401).json({ message: 'Token no válido - usuario no existe' })
