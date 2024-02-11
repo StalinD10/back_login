@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    image_user: {
+        public_id: String,
+        image_url: String
+    }
 }, {
     timestamps: true
 })

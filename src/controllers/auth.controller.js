@@ -3,23 +3,29 @@ import bcrypt from 'bcryptjs';
 import { createAccessToken } from '../libs/jwt.js';
 import jwt from 'jsonwebtoken'
 import { TOKEN_SECRET } from '../config.js';
-import { uploadImage } from '../utils/cloudinary.js';
+import { deleteImage, uploadImage } from '../utils/cloudinary.js';
+import fs from 'fs-extra';
 
 export const register = async (req, res) => {
 
     const { email, password, username } = req.body;
-
 
     try {
         const passwordHash = await bcrypt.hash(password, 10)
         const newUser = new User({
             username,
             email,
-            password: passwordHash
+            password: passwordHash,
         });
 
-        if(req.files?.image){
-            uploadImage
+        if (req.files?.image) {
+            const result = await uploadImage(req.files.image.tempFilePath);
+            newUser.image_user = {
+                public_id: result.public_id,
+                image_url: result.secure_url
+            }
+
+            await fs.unlink(req.files.image.tempFilePath)
         }
 
         const userSaved = await newUser.save();
@@ -30,6 +36,7 @@ export const register = async (req, res) => {
                 id: userSaved._id,
                 username: userSaved.username,
                 email: userSaved.email,
+                image: userSaved.image_user
             },
             token: token
 
@@ -38,6 +45,7 @@ export const register = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
 export const login = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -65,6 +73,56 @@ export const login = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+export const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.id);
+        if (!user) return res.status(404).json({ message: "El usuario no existe" });
+
+        if (user.image_user?.public_id) {
+            await deleteImage(user.image_user.public_id);
+        }
+
+        return res.json(user);
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+}
+
+export const updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findById(id);
+        if (!user) return res.status(404).json({ message: "El usuario no existe" });
+
+        // Actualiza los campos del usuario con los datos del cuerpo de la solicitud
+        if (req.body) {
+            Object.assign(user, req.body);
+        }
+
+        //Eliminar la anterior imagen
+        if (user.image_user) {
+            await deleteImage(user.image_user.public_id);
+        }
+
+        // Maneja la subida de imágenes si está presente en la solicitud
+        if (req.files?.image) {
+            const result = await uploadImage(req.files.image.tempFilePath);
+            user.image_user = {
+                public_id: result.public_id,
+                image_url: result.secure_url
+            };
+            await fs.unlink(req.files.image.tempFilePath);
+        }
+
+        // Guarda los cambios en la base de datos
+        const userUpdated = await user.save();
+
+        return res.json(userUpdated);
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
 
 export const logout = (req, res) => {
     res.cookie("token", "", {
