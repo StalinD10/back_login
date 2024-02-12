@@ -3,9 +3,9 @@ import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } from
 
 cloudinary.config({
 
-    cloud_name: 'dzfkp5ble',
-    api_key: '825251458227399',
-    api_secret: 'xDoYYbrv_21tYbiVl4Xr1nOH4Lc',
+    cloud_name: CLOUDINARY_CLOUD_NAME,
+    api_key: CLOUDINARY_API_KEY,
+    api_secret: CLOUDINARY_API_SECRET,
     secure: true
 
 });

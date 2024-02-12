@@ -98,6 +98,7 @@ export const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
         const user = await User.findById(id);
+        console.log(user)
         if (!user) return res.status(404).json({ message: "El usuario no existe" });
 
         // Actualiza los campos del usuario con los datos del cuerpo de la solicitud
@@ -106,7 +107,7 @@ export const updateUser = async (req, res) => {
         }
 
         //Eliminar la anterior imagen
-        if (user.image_user) {
+        if (user.image_user && user.image_user.public_id) {
             await deleteImage(user.image_user.public_id);
         }
 
