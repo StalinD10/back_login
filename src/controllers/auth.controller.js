@@ -16,6 +16,10 @@ export const register = async (req, res) => {
             username,
             email,
             password: passwordHash,
+            image_user: {
+                public_id: "",
+                image_url: ""
+            }
         });
 
         if (req.files?.image) {
