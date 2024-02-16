@@ -101,17 +101,14 @@ export const updateUser = async (req, res) => {
         console.log(user)
         if (!user) return res.status(404).json({ message: "El usuario no existe" });
 
-        // Actualiza los campos del usuario con los datos del cuerpo de la solicitud
         if (req.body) {
             Object.assign(user, req.body);
         }
 
-        //Eliminar la anterior imagen
         if (user.image_user && user.image_user.public_id) {
             await deleteImage(user.image_user.public_id);
         }
 
-        // Maneja la subida de imágenes si está presente en la solicitud
         if (req.files?.image) {
             const result = await uploadImage(req.files.image.tempFilePath);
             user.image_user = {
@@ -124,7 +121,17 @@ export const updateUser = async (req, res) => {
         // Guarda los cambios en la base de datos
         const userUpdated = await user.save();
 
-        return res.json(userUpdated);
+       
+        res.json({
+            user: {
+                id: userUpdated._id,
+                username: userUpdated.username,
+                email: userUpdated.email,
+                image: userUpdated.image_user
+            },
+            token: token
+
+        })
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
