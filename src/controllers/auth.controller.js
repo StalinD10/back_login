@@ -118,11 +118,11 @@ export const updateUser = async (req, res) => {
             await fs.unlink(req.files.image.tempFilePath);
         }
 
-        // Guarda los cambios en la base de datos
-        const userUpdated = await user.save();
+        // Actualiza el usuario en la base de datos
+        await User.findOneAndUpdate({ _id: id }, user);
 
+        res.json(user);
 
-        res.json(userUpdated);
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
