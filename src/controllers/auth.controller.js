@@ -122,16 +122,7 @@ export const updateUser = async (req, res) => {
         const userUpdated = await user.save();
 
 
-        res.json({
-            user: {
-                id: userUpdated._id,
-                username: userUpdated.username,
-                email: userUpdated.email,
-                image: userUpdated.image_user
-            },
-            token: token
-
-        })
+        res.json(userUpdated);
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
