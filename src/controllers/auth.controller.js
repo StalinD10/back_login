@@ -55,12 +55,11 @@ export const login = async (req, res) => {
     try {
 
         const userFound = await User.findOne({ email });
-        console.log(userFound.password);
-        console.log(password)
+      
         if (!userFound) return res.status(400).json({ message: "Usuario no encontrado" });
 
         const isMatch = await bcrypt.compare(password, userFound.password);
-        console.log(isMatch)
+       
         if (!isMatch) return res.status(400).json({ message: "Credenciales incorrectas" });
 
 
@@ -71,6 +70,7 @@ export const login = async (req, res) => {
                 id: userFound._id,
                 username: userFound.username,
                 email: userFound.email,
+                password: userFound.password,
                 image: userFound.image_user
             },
             token: token
