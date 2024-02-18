@@ -55,9 +55,12 @@ export const login = async (req, res) => {
     try {
 
         const userFound = await User.findOne({ email });
+        console.log(userFound.password);
+        console.log(password)
         if (!userFound) return res.status(400).json({ message: "Usuario no encontrado" });
 
         const isMatch = await bcrypt.compare(password, userFound.password);
+        console.log(isMatch)
         if (!isMatch) return res.status(400).json({ message: "Credenciales incorrectas" });
 
 
@@ -98,7 +101,6 @@ export const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
         const user = await User.findById(id);
-        console.log(user)
         if (!user) return res.status(404).json({ message: "El usuario no existe" });
 
         if (req.body) {
@@ -116,6 +118,13 @@ export const updateUser = async (req, res) => {
                 image_url: result.secure_url
             };
             await fs.unlink(req.files.image.tempFilePath);
+        }
+
+        if (req.body.password) {
+            console.log(req.body.password)
+            const passwordNormal = req.body.password;
+            const passwordHash = await bcrypt.hash(passwordNormal, 10)
+            user.password = passwordHash
         }
 
         // Actualiza el usuario en la base de datos
