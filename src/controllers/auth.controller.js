@@ -121,7 +121,6 @@ export const updateUser = async (req, res) => {
         }
 
         if (req.body.password) {
-            console.log(req.body.password)
             const passwordNormal = req.body.password;
             const passwordHash = await bcrypt.hash(passwordNormal, 10)
             user.password = passwordHash
