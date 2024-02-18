@@ -121,7 +121,7 @@ export const updateUser = async (req, res) => {
         // Guarda los cambios en la base de datos
         const userUpdated = await user.save();
 
-       
+
         res.json({
             user: {
                 id: userUpdated._id,
@@ -162,6 +162,7 @@ export const validateToken = async (req, res) => {
                 id: userSaved._id,
                 username: userSaved.username,
                 email: userSaved.email,
+                image: userSaved.image_user
             },
             token: tokenHeader
         });
