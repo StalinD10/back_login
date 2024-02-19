@@ -129,7 +129,17 @@ export const updateUser = async (req, res) => {
         // Actualiza el usuario en la base de datos
         await User.findOneAndUpdate({ _id: id }, user);
 
-        res.json(user);
+        res.json({
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                password: user.password,
+                image: user.image_user
+            }
+
+        })
+
 
     } catch (error) {
         return res.status(500).json({ message: error.message });
