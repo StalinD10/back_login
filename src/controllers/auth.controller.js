@@ -70,7 +70,7 @@ export const login = async (req, res) => {
                 id: userFound._id,
                 username: userFound.username,
                 email: userFound.email,
-                password: userFound.password,
+                password: password,
                 image: userFound.image_user
             },
             token: token
