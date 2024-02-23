@@ -112,6 +112,7 @@ export const updateUser = async (req, res) => {
         }
 
         if (req.files?.image) {
+            console.log(req.files.image.data)
             const result = await uploadImage(req.files.image.tempFilePath);
             user.image_user = {
                 public_id: result.public_id,
